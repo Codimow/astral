@@ -1,0 +1,26 @@
+# Binaries
+bin/
+dist/
+asl
+
+# Test coverage
+*.out
+coverage.html
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+
+# Test repositories
+test_repos/
+tmp/
