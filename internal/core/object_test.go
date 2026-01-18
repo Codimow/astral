@@ -8,7 +8,7 @@ import (
 func TestEncodeDecodeCommit(t *testing.T) {
 	original := &Commit{
 		Tree:      HashBytes([]byte("tree")),
-		Parent:    HashBytes([]byte("parent")),
+		Parents:   []Hash{HashBytes([]byte("parent"))},
 		Author:    "Test Author",
 		Email:     "test@example.com",
 		Timestamp: time.Unix(1234567890, 0),
@@ -31,7 +31,9 @@ func TestEncodeDecodeCommit(t *testing.T) {
 	if decoded.Tree != original.Tree {
 		t.Error("tree hash mismatch")
 	}
-	if decoded.Parent != original.Parent {
+	if len(decoded.Parents) != len(original.Parents) {
+		t.Error("parent count mismatch")
+	} else if len(decoded.Parents) > 0 && decoded.Parents[0] != original.Parents[0] {
 		t.Error("parent hash mismatch")
 	}
 	if decoded.Author != original.Author {
@@ -51,7 +53,7 @@ func TestEncodeDecodeCommit(t *testing.T) {
 func TestEncodeDecodeCommitNoParent(t *testing.T) {
 	original := &Commit{
 		Tree:      HashBytes([]byte("tree")),
-		Parent:    Hash{}, // Zero hash (no parent)
+		Parents:   []Hash{}, // No parents
 		Author:    "Test Author",
 		Email:     "test@example.com",
 		Timestamp: time.Now(),
@@ -64,8 +66,8 @@ func TestEncodeDecodeCommitNoParent(t *testing.T) {
 		t.Fatalf("failed to decode commit: %v", err)
 	}
 
-	if !decoded.Parent.IsZero() {
-		t.Error("expected zero parent hash")
+	if len(decoded.Parents) != 0 {
+		t.Error("expected no parents")
 	}
 }
 

@@ -27,8 +27,10 @@ func FindLCA(store *storage.Store, commit1, commit2 core.Hash) (core.Hash, error
 			continue // Reached root
 		}
 
-		if !commit.Parent.IsZero() {
-			queue1 = append(queue1, commit.Parent)
+		for _, parent := range commit.Parents {
+			if !parent.IsZero() {
+				queue1 = append(queue1, parent)
+			}
 		}
 	}
 
@@ -53,8 +55,10 @@ func FindLCA(store *storage.Store, commit1, commit2 core.Hash) (core.Hash, error
 			continue // Reached root
 		}
 
-		if !commit.Parent.IsZero() {
-			queue2 = append(queue2, commit.Parent)
+		for _, parent := range commit.Parents {
+			if !parent.IsZero() {
+				queue2 = append(queue2, parent)
+			}
 		}
 	}
 
@@ -88,8 +92,10 @@ func IsAncestor(store *storage.Store, ancestor, commit core.Hash) (bool, error) 
 			continue
 		}
 
-		if !c.Parent.IsZero() {
-			queue = append(queue, c.Parent)
+		for _, parent := range c.Parents {
+			if !parent.IsZero() {
+				queue = append(queue, parent)
+			}
 		}
 	}
 

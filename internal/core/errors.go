@@ -14,8 +14,8 @@ var (
 	ErrInvalidHash    = errors.New("invalid hash")
 
 	// Branch errors
-	ErrBranchNotFound    = errors.New("branch not found")
-	ErrBranchExists      = errors.New("branch already exists")
+	ErrBranchNotFound                   = errors.New("branch not found")
+	ErrBranchExists                     = errors.New("branch already exists")
 	ErrInvalidBranchName = errors.New("invalid branch name")
 
 	// Commit errors
@@ -26,4 +26,11 @@ var (
 	// Working directory errors
 	ErrDirtyWorkingDir = errors.New("working directory has uncommitted changes")
 	ErrFileNotFound    = errors.New("file not found")
+
+	// Merge errors
+	ErrNoCommonAncestor  = errors.New("no common ancestor found")
+	ErrMergeInProgress   = errors.New("merge already in progress")
+	ErrNoMergeInProgress = errors.New("no merge in progress")
+	ErrConflictsExist    = errors.New("unresolved conflicts exist")
+	ErrInvalidStrategy   = errors.New("invalid merge strategy")
 )

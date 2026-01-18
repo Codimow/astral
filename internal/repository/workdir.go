@@ -45,9 +45,13 @@ func (r *Repository) Save(files []string, message string) (core.Hash, error) {
 	}
 
 	// Create commit
+	var parents []core.Hash
+	if !parentHash.IsZero() {
+		parents = []core.Hash{parentHash}
+	}
 	commit := &core.Commit{
 		Tree:      treeHash,
-		Parent:    parentHash,
+		Parents:   parents,
 		Author:    r.getAuthorName(),
 		Email:     r.getAuthorEmail(),
 		Timestamp: time.Now(),
@@ -202,7 +206,12 @@ func (r *Repository) Undo() error {
 	}
 
 	ref := filepath.Join(headsDir, branch)
-	return r.SetRef(ref, commit.Parent)
+	// Move to first parent (or zero hash if no parents)
+	var parentHash core.Hash
+	if len(commit.Parents) > 0 {
+		parentHash = commit.Parents[0]
+	}
+	return r.SetRef(ref, parentHash)
 }
 
 // Amend modifies the last commit
@@ -242,10 +251,10 @@ func (r *Repository) Amend(files []string, message string) (core.Hash, error) {
 		return core.Hash{}, err
 	}
 
-	// Create new commit with same parent as old commit
+	// Create new commit with same parents as old commit
 	commit := &core.Commit{
 		Tree:      treeHash,
-		Parent:    oldCommit.Parent,
+		Parents:   oldCommit.Parents,
 		Author:    r.getAuthorName(),
 		Email:     r.getAuthorEmail(),
 		Timestamp: time.Now(),
@@ -288,7 +297,12 @@ func (r *Repository) GetCommitHistory(startHash core.Hash, limit int) ([]*core.C
 		commits = append(commits, commit)
 		hashes = append(hashes, hash)
 
-		hash = commit.Parent
+		// Follow first parent for history
+		if len(commit.Parents) > 0 {
+			hash = commit.Parents[0]
+		} else {
+			hash = core.Hash{}
+		}
 		count++
 	}
 

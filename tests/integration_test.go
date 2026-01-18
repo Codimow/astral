@@ -80,12 +80,12 @@ func TestIntegrationBasicWorkflow(t *testing.T) {
 	}
 
 	// Check parent relationship
-	if commits[0].Parent != hash1 {
+	if len(commits[0].Parents) == 0 || commits[0].Parents[0] != hash1 {
 		t.Error("second commit should have first commit as parent")
 	}
 
-	if !commits[1].Parent.IsZero() {
-		t.Error("first commit should have no parent")
+	if len(commits[1].Parents) != 0 {
+		t.Error("first commit should have no parents")
 	}
 }
 

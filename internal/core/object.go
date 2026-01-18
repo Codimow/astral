@@ -25,7 +25,7 @@ type Object struct {
 // Commit represents a commit object
 type Commit struct {
 	Tree      Hash
-	Parent    Hash
+	Parents   []Hash // Support multiple parents for merge commits
 	Author    string
 	Email     string
 	Timestamp time.Time
@@ -49,8 +49,10 @@ func EncodeCommit(c *Commit) []byte {
 	var buf bytes.Buffer
 
 	fmt.Fprintf(&buf, "tree %s\n", c.Tree.String())
-	if !c.Parent.IsZero() {
-		fmt.Fprintf(&buf, "parent %s\n", c.Parent.String())
+	for _, parent := range c.Parents {
+		if !parent.IsZero() {
+			fmt.Fprintf(&buf, "parent %s\n", parent.String())
+		}
 	}
 	fmt.Fprintf(&buf, "author %s <%s> %d\n", c.Author, c.Email, c.Timestamp.Unix())
 	fmt.Fprintf(&buf, "\n%s\n", c.Message)
@@ -95,7 +97,7 @@ func DecodeCommit(data []byte) (*Commit, error) {
 			if err != nil {
 				return nil, fmt.Errorf("invalid parent hash: %w", err)
 			}
-			commit.Parent = hash
+			commit.Parents = append(commit.Parents, hash)
 
 		case "author":
 			// Parse: "Name <email> timestamp"

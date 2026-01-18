@@ -71,6 +71,70 @@ asl stack
 - `asl show [commit]` - Show commit details
 - `asl diff [commit1] [commit2]` - Show differences
 
+### Merging ✨ NEW
+
+- `asl merge \<branch\>` - Merge a branch into current branch
+- `asl merge --abort` - Cancel ongoing merge
+- `asl merge --continue` - Complete merge after resolving conflicts
+- `asl resolve \<file\>` - Mark file as resolved
+- `asl resolve --ours` - Resolve all using our version
+- `asl resolve --theirs` - Resolve all using their version
+- `asl status` - View repository and merge status
+
+## 🌿 Merging Branches
+
+Astral provides powerful merge capabilities with automatic conflict detection:
+
+```bash
+# Create and work on a feature branch
+asl branch new-feature
+asl switch new-feature
+# ... make changes ...
+asl save -m "Implement feature"
+
+# Merge back to main
+asl switch main
+asl merge new-feature
+# ✓ Merge completed successfully
+```
+
+### Handling Conflicts
+
+When conflicts occur, Astral guides you through resolution:
+
+```bash
+$ asl merge feature-x
+✗ Merge conflict detected
+
+Conflicted files:
+  ✗ src/main.go
+
+# Fix conflicts manually
+vim src/main.go
+
+# Mark as resolved
+asl resolve src/main.go
+
+# Complete the merge
+asl merge --continue
+# ✓ Merge completed
+```
+
+Or use automatic strategies:
+
+```bash
+# Keep our changes
+asl resolve --ours
+
+# Keep their changes
+asl resolve --theirs
+
+# Then continue
+asl merge --continue
+```
+
+See [`docs/MERGING.md`](docs/MERGING.md) for detailed merge documentation.
+
 ## 🏗️ Architecture
 
 Astral uses a content-addressable storage system with several key innovations:
@@ -170,10 +234,12 @@ MIT License - see [LICENSE](LICENSE) for details
 - [x] History viewing
 - [x] Stack visualization
 
-### Phase 2: Merging (In Progress)
-- [ ] Three-way merge algorithm
-- [ ] Conflict resolution
-- [ ] Interactive merge tool
+### Phase 2: Merging ✅
+- [x] Three-way merge algorithm
+- [x] Conflict detection and resolution
+- [x] Fast-forward merges
+- [x] Merge state management
+- [x] Conflict resolution strategies
 
 ### Phase 3: Remote Operations
 - [ ] Custom sync protocol

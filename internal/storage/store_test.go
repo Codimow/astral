@@ -86,7 +86,7 @@ func TestStorePutCommit(t *testing.T) {
 	// Create commit
 	commit := &core.Commit{
 		Tree:      core.HashBytes([]byte("tree")),
-		Parent:    core.Hash{},
+		Parents:   []core.Hash{},
 		Author:    "Test",
 		Email:     "test@test.com",
 		Timestamp: time.Now(),
