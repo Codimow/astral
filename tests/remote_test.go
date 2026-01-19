@@ -1,12 +1,14 @@
-package remote
+package tests
 
 import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/codimo/astral/internal/remote"
 )
 
-func createTestRepo(t *testing.T) string {
+func createTestRepoDir(t *testing.T) string {
 	tempDir, err := os.MkdirTemp("", "astral-remote-test")
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
@@ -27,17 +29,17 @@ func createTestRepo(t *testing.T) string {
 }
 
 func TestRemoteOperations(t *testing.T) {
-	repoPath := createTestRepo(t)
+	repoPath := createTestRepoDir(t)
 	defer os.RemoveAll(repoPath)
 
 	// Test AddRemote
-	err := AddRemote(repoPath, "origin", "https://github.com/example/repo.git")
+	err := remote.AddRemote(repoPath, "origin", "https://github.com/example/repo.git")
 	if err != nil {
 		t.Fatalf("AddRemote failed: %v", err)
 	}
 
 	// Test ListRemotes
-	remotes, err := ListRemotes(repoPath)
+	remotes, err := remote.ListRemotes(repoPath)
 	if err != nil {
 		t.Fatalf("ListRemotes failed: %v", err)
 	}
@@ -55,13 +57,13 @@ func TestRemoteOperations(t *testing.T) {
 	}
 
 	// Test duplicate AddRemote
-	err = AddRemote(repoPath, "origin", "https://github.com/example/other.git")
+	err = remote.AddRemote(repoPath, "origin", "https://github.com/example/other.git")
 	if err == nil {
 		t.Error("Expected error when adding duplicate remote, got nil")
 	}
 
 	// Test GetRemote
-	r, err := GetRemote(repoPath, "origin")
+	r, err := remote.GetRemote(repoPath, "origin")
 	if err != nil {
 		t.Fatalf("GetRemote failed: %v", err)
 	}
@@ -70,12 +72,12 @@ func TestRemoteOperations(t *testing.T) {
 	}
 
 	// Test RemoveRemote
-	err = RemoveRemote(repoPath, "origin")
+	err = remote.RemoveRemote(repoPath, "origin")
 	if err != nil {
 		t.Fatalf("RemoveRemote failed: %v", err)
 	}
 
-	remotes, err = ListRemotes(repoPath)
+	remotes, err = remote.ListRemotes(repoPath)
 	if err != nil {
 		t.Fatalf("ListRemotes failed after remove: %v", err)
 	}
@@ -88,12 +90,12 @@ func TestRemoteOperations(t *testing.T) {
 func TestParseURL(t *testing.T) {
 	tests := []struct {
 		url      string
-		expected RemoteURL
+		expected remote.RemoteURL
 		wantErr  bool
 	}{
 		{
 			url: "https://github.com/user/repo.git",
-			expected: RemoteURL{
+			expected: remote.RemoteURL{
 				Protocol: "https",
 				Host:     "github.com",
 				Path:     "/user/repo.git",
@@ -102,7 +104,7 @@ func TestParseURL(t *testing.T) {
 		},
 		{
 			url: "http://localhost:8080/repo",
-			expected: RemoteURL{
+			expected: remote.RemoteURL{
 				Protocol: "http",
 				Host:     "localhost",
 				Port:     8080,
@@ -113,7 +115,7 @@ func TestParseURL(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		got, err := ParseURL(tt.url)
+		got, err := remote.ParseURL(tt.url)
 		if (err != nil) != tt.wantErr {
 			t.Errorf("ParseURL(%q) error = %v, wantErr %v", tt.url, err, tt.wantErr)
 			continue

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/codimo/astral/internal/core"
@@ -25,18 +26,26 @@ type MergeResult struct {
 	Conflicted  []string
 }
 
-// Merge merges the specified branch into the current branch
-func (r *Repository) Merge(branch string, opts MergeOptions) (*MergeResult, error) {
+// Merge merges the specified branch or ref into the current branch
+func (r *Repository) Merge(refName string, opts MergeOptions) (*MergeResult, error) {
 	// 1. Check if merge already in progress
 	if merge.IsMergeInProgress(r.Root) {
 		return nil, core.ErrMergeInProgress
 	}
 
-	// 2. Resolve branch name to commit hash
-	theirRef := fmt.Sprintf("refs/heads/%s", branch)
-	theirCommit, err := r.GetRef(theirRef)
+	// 2. Resolve ref name to commit hash
+	var theirCommit core.Hash
+	var err error
+
+	// Support full refs (e.g. refs/remotes/...) or short branch names
+	if strings.HasPrefix(refName, "refs/") {
+		theirCommit, err = r.GetRef(refName)
+	} else {
+		theirCommit, err = r.GetRef(fmt.Sprintf("refs/heads/%s", refName))
+	}
+
 	if err != nil {
-		return nil, fmt.Errorf("failed to resolve branch %s: %w", branch, err)
+		return nil, fmt.Errorf("failed to resolve ref %s: %w", refName, err)
 	}
 
 	// 3. Get current HEAD commit
@@ -64,11 +73,11 @@ func (r *Repository) Merge(branch string, opts MergeOptions) (*MergeResult, erro
 
 	// 7. If can FF and not NoFF, do fast-forward
 	if canFF && !opts.NoFF {
-		return r.doFastForward(theirCommit, branch)
+		return r.doFastForward(theirCommit, refName)
 	}
 
 	// 8. Otherwise, do three-way merge
-	return r.doThreeWayMerge(baseCommit, ourCommit, theirCommit, branch, opts)
+	return r.doThreeWayMerge(baseCommit, ourCommit, theirCommit, refName, opts)
 }
 
 // doFastForward performs a fast-forward merge

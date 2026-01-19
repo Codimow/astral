@@ -2,6 +2,7 @@ package core
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"io"
 
 	"github.com/zeebo/blake3"
@@ -18,6 +19,25 @@ func (h Hash) String() string {
 // Short returns the first 7 characters of the hash (like git)
 func (h Hash) Short() string {
 	return h.String()[:7]
+}
+
+// MarshalJSON implements json.Marshaler
+func (h Hash) MarshalJSON() ([]byte, error) {
+	return json.Marshal(h.String())
+}
+
+// UnmarshalJSON implements json.Unmarshaler
+func (h *Hash) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+	hash, err := ParseHash(s)
+	if err != nil {
+		return err
+	}
+	*h = hash
+	return nil
 }
 
 // HashBytes computes the Blake3 hash of a byte slice
